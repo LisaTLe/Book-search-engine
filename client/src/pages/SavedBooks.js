@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Jumbotron,
   Container,
@@ -9,7 +9,7 @@ import {
 
 // import { getMe, deleteBook } from '../utils/API';
 import Auth from "../utils/auth";
-import { removeBookId } from "../utils/localStorage";
+import { removeBookId, saveBookIds } from "../utils/localStorage";
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_ME } from "../utils/queries";
 import { REMOVE_BOOK } from "../utils/mutations";
@@ -17,11 +17,11 @@ import { REMOVE_BOOK } from "../utils/mutations";
 const SavedBooks = () => {
   // const [userData, setUserData] = useState({});
   const { loading, data } = useQuery(GET_ME);
-  const [removeBook, { error }] = useMutation(REMOVE_BOOK);
+
   // use this to determine if `useEffect()` hook needs to run again
   const userData = data?.me || {};
   // const userDataLength = Object.keys(userData).length;
-
+  const [removeBook, { error }] = useMutation(REMOVE_BOOK);
   // useEffect(() => {
   //   const getUserData = async () => {
   //     try {
@@ -56,13 +56,16 @@ const SavedBooks = () => {
     }
 
     try {
-      const { data } = await removeBook({
-        variables: { bookId },
+      const response = await removeBook({
+        variables: { bookId: bookId },
       });
 
+      if (!response) {
+        throw new Error("something went wrong");
+      }
       removeBookId(bookId);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
