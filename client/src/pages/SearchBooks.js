@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 
 import Auth from "../utils/auth";
-import { searchGoogleBooks } from "../utils/API";
+import { saveBook, searchGoogleBooks } from "../utils/API";
 import { saveBookIds, getSavedBookIds } from "../utils/localStorage";
 import { SAVE_BOOK } from "../utils/mutations";
 import { useMutation } from "@apollo/react-hooks";
@@ -20,7 +20,7 @@ const SearchBooks = () => {
   const [searchedBooks, setSearchedBooks] = useState([]);
   // create state for holding our search field data
   const [searchInput, setSearchInput] = useState("");
-
+  const [saveBook, { error }] = useMutation(SAVE_BOOK);
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
 
@@ -30,7 +30,7 @@ const SearchBooks = () => {
     return () => saveBookIds(savedBookIds);
   });
 
-  const [saveBook, { error }] = useMutation(SAVE_BOOK);
+  // const [saveBook] = useMutation(SAVE_BOOK);
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
     event.preventDefault();
@@ -76,16 +76,9 @@ const SearchBooks = () => {
     }
 
     try {
-      const response = await saveBook({
-        variables: {
-          input: bookToSave,
-        },
+      await saveBook({
+        variables: { body: bookToSave },
       });
-
-      if (!response) {
-        throw new Error("something went wrong!");
-      }
-
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
